@@ -1,0 +1,54 @@
+.grid-pane{
+    -fx-background-color: transparent;
+}
+
+#window-background{
+    -fx-fill: #c3c9d5;
+}
+#board-background{
+    -fx-fill: #cad3e6;
+}
+
+#IOPane{
+-fx-background-color: #c3c9d5;
+-fx-background-radius: 10;
+-fx-border-radius: 10;
+-fx-border-width:1;
+-fx-border-color: rgba(99,99,99,0.5);
+}
+
+
+/*TEXT AREA*/
+.text-area {
+   -fx-font-size: 26;
+    -fx-border-color:rgba(102,102,102,0.5);
+    -fx-border-radius: 2;
+   -fx-text-fill: #2f78f4;
+ }
+
+.text-area .content {
+    -fx-cursor: DEFAULT ;
+}
+.text-area, .text-area .viewport, .text-area .content {
+    -fx-background-color: transparent ;
+}
+
+.text-area:focused .content {
+    -fx-background-color:#6da2fe;
+    -fx-border-color: #6da2fe;
+}
+
+.text-area:focused {
+    -fx-background-color:#6da2fe;
+}
+
+.text-area .scroll-bar:vertical {
+    -fx-pref-width: 1;
+    -fx-opacity: 0;
+}
+.text-area .scroll-bar:horizontal {
+    -fx-pref-height: 1;
+    -fx-opacity: 0;
+}
+
+
