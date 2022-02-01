@@ -14,6 +14,8 @@ notes mode
 undo move(notes included) 
 
 
+
+
 Board generator:
 
 generates random board with only one solution. difficulty varies from super easy to super hard (unfortunately)
