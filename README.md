@@ -5,6 +5,11 @@ complete GUI for sudoku games with board highlights and sudoku generator
 ![image](https://user-images.githubusercontent.com/53341064/149345148-18a55942-8313-47cf-a6f3-44532d5b3ea8.png)
 
 
+Features:
+
+same num, cel conflict and mistakes highlight
+notes mode
+undo move(notes included) 
 
 
 Board generator:
@@ -19,7 +24,4 @@ how it works
 
 
 
-To do:
 
-to add multimple solving strategies and implement them into the GUI, creating a proper sudoku solver
-the end goal is to create something like a solver from sudokuwiki.org, but with better input mechanics
