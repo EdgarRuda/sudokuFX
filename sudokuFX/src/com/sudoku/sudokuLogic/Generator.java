@@ -46,7 +46,7 @@ public class Generator{
 
     private void removeValues(int[][] board) {
         int i, j, cell, cellValue;
-        int cluesLeft = 30;
+        int cluesLeft = 5;
         List<Integer> list = new ArrayList<>();
         for (int t = 0; t < N * N; t++)
             list.add(t);
