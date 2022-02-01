@@ -25,3 +25,5 @@ how it works
 
 
 
+VM options for intellij:
+--module-path ${PATH_TO_FX} --add-modules javafx.controls,javafx.fxml
