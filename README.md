@@ -6,11 +6,10 @@ complete GUI for sudoku games with board highlights and sudoku generator
 
 
 Features:
+
   same num, cel conflict and mistakes highlight
   notes mode
   undo move(notes included) 
-
-
 
 
 Board generator:
