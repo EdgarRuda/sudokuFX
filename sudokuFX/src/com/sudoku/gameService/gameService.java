@@ -221,7 +221,7 @@ public class gameService {
     }
 
     public void processEvent(MouseEvent event) {
-        if (gameStarted && !gameIsPaused  && inputEnabled)
+        if (gameStarted && !gameIsPaused && inputEnabled)
             processInput(new int[]{keyService.getId(event)});
     }
 
@@ -237,53 +237,68 @@ public class gameService {
 
     }
 
-    private void requestCellFocus(){
+    private void requestCellFocus() {
         defModeCells.get(lastId).requestFocus();
         highlightService.highlightCells(lastId, sudokuBoard, errorHighlight);
     }
 
-    private void optionsToggle(int option){
-        switch (option) {
-            case 1 -> toggleNoteSwitch();
-            case 2 -> {
-                toggleErrorHighlight();
-                highlightService.highlightCells(lastId, sudokuBoard, errorHighlight);
-            }
-            case 3 -> undoInput();
+    private void optionsToggle(int option) {
+
+        if(option==1)
+            toggleNoteSwitch();
+        else if(option == 2){
+            toggleErrorHighlight();
+            highlightService.highlightCells(lastId, sudokuBoard, errorHighlight);
         }
+        else
+            undoInput();
     }
 
-    private void processNumericInput(int inputNum){
+    private void processNumericInput(int inputNum) {
         int row = lastId / 9;
         int col = lastId % 9;
 
-        if (sudokuBoard.getCellType(row, col)){
+        if (sudokuBoard.getCellType(row, col)) {
             if (notesEnabled) {
                 if (!sudokuBoard.getCellMode(row, col)) {
                     addToBoard(0);
                     validator.checkConflicts(lastId, sudokuBoard);
                 }
-                toggleNoteCell(inputNum);
+
+                toggleNoteValue(inputNum);
+                pushCellHistory(inputNum, notesEnabled, false);
 
             } else {
                 if (sudokuBoard.getCellMode(row, col))
                     clearNotes();
+
                 addToBoard(inputNum);
+
+                if (!removeSameNotes(inputNum))
+                    pushCellHistory(inputNum, notesEnabled, false);
+
                 validator.checkConflicts(lastId, sudokuBoard);
                 checkIfWon();
             }
-        pushCellHistory(inputNum, notesEnabled);
         }
         highlightService.highlightCells(lastId, sudokuBoard, errorHighlight);
 
     }
 
-    private void pushCellHistory(int num, boolean isNoteMode) {
-        sudokuBoard.moveHistory.push(lastId);
+    private void pushCellHistory(int num, boolean isNoteMode, boolean addToPrevStack) {
+        if (addToPrevStack)
+            sudokuBoard.moveHistory.peek().push(lastId);
+        else {
+            Stack<Integer> s = new Stack<>();
+            s.push(lastId);
+            sudokuBoard.moveHistory.push(s);
+        }
+
         if (sudokuBoard.cellHistory.containsKey(lastId) && !sudokuBoard.cellHistory.get(lastId).isEmpty()) {
             if (isNoteMode) {
                 if (sudokuBoard.cellHistory.get(lastId).peek().isNoteMode)
-                    sudokuBoard.cellHistory.get(lastId).push(new cellHistoryNode(true, sudokuBoard.cellHistory.get(lastId).peek().notes.clone(), num));
+                    sudokuBoard.cellHistory.get(lastId)
+                            .push(new cellHistoryNode(true, sudokuBoard.cellHistory.get(lastId).peek().notes.clone(), num));
                 else
                     sudokuBoard.cellHistory.get(lastId).push(new cellHistoryNode(true, num));
             } else {
@@ -296,28 +311,52 @@ public class gameService {
             else
                 sudokuBoard.cellHistory.get(lastId).push(new cellHistoryNode(false, num));
         }
+    }
+
+    private void pushNoteHistoryList(Stack<Integer> ids, int num) {
+        sudokuBoard.moveHistory.push(ids);
+        Stack<Integer> t = new Stack<>();
+        t.addAll(ids);
+        int idTemp;
+        while (!t.isEmpty()) {
+            idTemp = t.pop();
+            if (sudokuBoard.cellHistory.containsKey(idTemp) && !sudokuBoard.cellHistory.get(idTemp).isEmpty()) {
+                if (sudokuBoard.cellHistory.get(idTemp).peek().isNoteMode)
+                    sudokuBoard.cellHistory.get(idTemp)
+                            .push(new cellHistoryNode(true, sudokuBoard.cellHistory.get(idTemp).peek().notes.clone(), num));
+                else
+                    sudokuBoard.cellHistory.get(idTemp).push(new cellHistoryNode(true, num));
+            }
+        }
+
+        pushCellHistory(num, false, true);
 
     }
 
 
     private void undoInput() {
         if (!sudokuBoard.moveHistory.isEmpty()) {
-            lastId = sudokuBoard.moveHistory.pop();
-            sudokuBoard.cellHistory.get(lastId).pop();
+            Stack<Integer> ids = sudokuBoard.moveHistory.pop();
+            int idTemp = lastId;
 
-            if (sudokuBoard.cellHistory.get(lastId).isEmpty()) {
-                if (sudokuBoard.checkIfCellIsInNoteMode(lastId))
-                    clearNotes();
-                addToBoard(0);
-            } else if (sudokuBoard.cellHistory.get(lastId).peek().isNoteMode) {
-                toggleNoteList(sudokuBoard.cellHistory.get(lastId).peek().notes);
-                addToBoard(0);
-            } else {
-                if (sudokuBoard.checkIfCellIsInNoteMode(lastId))
-                    clearNotes();
-                addToBoard(sudokuBoard.cellHistory.get(lastId).peek().num);
+            while (!ids.isEmpty()) {
+                lastId = ids.pop();
+                sudokuBoard.cellHistory.get(lastId).pop();
+
+                if (sudokuBoard.cellHistory.get(lastId).isEmpty()) {
+                    if (sudokuBoard.checkIfCellIsInNoteMode(lastId))
+                        clearNotes();
+                    addToBoard(0);
+                } else if (sudokuBoard.cellHistory.get(lastId).peek().isNoteMode) {
+                    toggleNoteList(sudokuBoard.cellHistory.get(lastId).peek().notes);
+                    addToBoard(0);
+                } else {
+                    if (sudokuBoard.checkIfCellIsInNoteMode(lastId))
+                        clearNotes();
+                    addToBoard(sudokuBoard.cellHistory.get(lastId).peek().num);
+                }
             }
-
+            lastId = idTemp;
             validator.checkConflicts(lastId, sudokuBoard);
             highlightService.highlightCells(lastId, sudokuBoard, errorHighlight);
         }
@@ -349,17 +388,46 @@ public class gameService {
     }
 
 
-    private void toggleNoteCell(int num) {
+    private void toggleNoteValue(int num) {
 
         GridPane g = noteModeCells.get(lastId);
         sudokuBoard.setCellMode(lastId / 9, lastId % 9, true);
-
+        int count = 1;
         for (Node n : g.getChildren())
-            if (Integer.parseInt(n.getId()) == num) {
+            if (count++ == num) {
                 n.setVisible(!n.isVisible());
                 break;
             }
+    }
 
+
+    private boolean removeSameNotes(int num) {
+        GridPane g;
+        Stack<Integer> ids = new Stack<>();
+        List<int[]> cells = validator.getCorrespondingCells(lastId / 9, lastId % 9);
+
+        int cellId;
+
+        for (int[] cell : cells) {
+            if (sudokuBoard.getCellMode(cell[0], cell[1])) {
+                cellId = sudokuBoard.getCellId(cell[0], cell[1]);
+                g = noteModeCells.get(cellId);
+                int count = 1;
+                for (Node n : g.getChildren())
+                    if (count++ == num) {
+                        if (n.isVisible()) {
+                            ids.push(cellId);
+                        }
+                        n.setVisible(false);
+                        break;
+                    }
+
+            }
+        }
+        if (!ids.isEmpty()) {
+            pushNoteHistoryList(ids, num);
+            return true;
+        } else return false;
     }
 
     private void clearNotes() {

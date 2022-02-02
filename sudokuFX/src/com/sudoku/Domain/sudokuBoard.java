@@ -34,8 +34,8 @@ public class sudokuBoard {
     public int[][] board;
     public int[][] solvedBoard;
     public boolean[][][] statusBoard;   //1. is cell open 2. is note mode enabled 3.is conflict
-    public Stack<Integer> moveHistory;
-    public Map<Integer, Stack<cellHistoryNode>> cellHistory;
+    public Stack<Stack<Integer>> moveHistory;  //stores affected cells id
+    public Map<Integer, Stack<cellHistoryNode>> cellHistory;    //stores cells states
     public boolean isConflict;
 
 

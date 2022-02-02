@@ -72,7 +72,7 @@ public class Validator{
     }
 
 
-private List<int[]> getCorrespondingCells(int row, int col) {
+public List<int[]> getCorrespondingCells(int row, int col) {
     List<int[]> cells = new ArrayList<>();
 
     int sRow = row - row % 3;
