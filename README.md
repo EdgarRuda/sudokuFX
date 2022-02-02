@@ -39,6 +39,10 @@ how it works
 	4. when all cells are checked and there is nothing else to remove without producing multimple solutions - board is ready
 
 
+//
+Updates
+
+	02.02.22 - multiple correponding notes erase support when clue is added
 
 //
 VM options for intellij:
